@@ -1,0 +1,24 @@
+annotations:
+  artifacthub.io/category: networking
+apiVersion: v2
+appVersion: cec07b7
+dependencies:
+- name: common
+  repository: https://charts.bitnami.com/bitnami
+  tags:
+  - bitnami-common
+  version: 1.x.x
+description: 'Helm chart to deploy PacketRusher service on Kubernetes. '
+home: https://github.com/gradiant/5g-charts
+keywords:
+- network
+- gnb
+- ue
+- gradiant
+maintainers:
+- email: avrodriguez@gradiant.org
+  name: avrodriguez
+name: packetrusher
+sources:
+- https://github.com/HewlettPackard/PacketRusher
+version: 0.0.1
