@@ -514,6 +514,55 @@ kubectl get all -n monitoring
 ```
 ---
 ###Access Monitoring Dashboards
+first see the availble nodes with:
+```bash
+kubectl get all -n monitoring
+```
+there should be a similar output:
+
+```
+NAME                                                         READY   STATUS    RESTARTS      AGE
+pod/alertmanager-kind-prometheus-kube-prome-alertmanager-0   2/2     Running   0             109s
+pod/kind-prometheus-grafana-7cd8657994-p5nph                 3/3     Running   0             2m7s
+pod/kind-prometheus-kube-prome-operator-5977cd7b87-7kbxl     1/1     Running   0             2m7s
+pod/kind-prometheus-kube-state-metrics-f9f7f64bf-qqxvz       1/1     Running   1 (54s ago)   2m7s
+pod/kind-prometheus-prometheus-node-exporter-hxnk2           1/1     Running   0             2m7s
+pod/prometheus-kind-prometheus-kube-prome-prometheus-0       2/2     Running   0             108s
+
+NAME                                               TYPE        CLUSTER-IP      EXTERNAL-IP   PORT(S)                         AGE
+service/alertmanager-operated                      ClusterIP   None            <none>        9093/TCP,9094/TCP,9094/UDP      109s
+service/kind-prometheus-grafana                    NodePort    10.96.27.253    <none>        80:31000/TCP                    2m7s
+service/kind-prometheus-kube-prome-alertmanager    NodePort    10.96.32.250    <none>        9093:32000/TCP,8080:31127/TCP   2m7s
+service/kind-prometheus-kube-prome-operator        ClusterIP   10.96.85.157    <none>        443/TCP                         2m7s
+service/kind-prometheus-kube-prome-prometheus      NodePort    10.96.123.199   <none>        9090:30000/TCP,8080:30197/TCP   2m7s
+service/kind-prometheus-kube-state-metrics         ClusterIP   10.96.234.250   <none>        8080/TCP                        2m7s
+service/kind-prometheus-prometheus-node-exporter   NodePort    10.96.202.206   <none>        9100:32001/TCP                  2m7s
+service/prometheus-operated                        ClusterIP   None            <none>        9090/TCP                        108s
+
+NAME                                                      DESIRED   CURRENT   READY   UP-TO-DATE   AVAILABLE   NODE SELECTOR            AGE
+daemonset.apps/kind-prometheus-prometheus-node-exporter   1         1         1       1            1           kubernetes.io/os=linux   2m7s
+
+NAME                                                  READY   UP-TO-DATE   AVAILABLE   AGE
+deployment.apps/kind-prometheus-grafana               1/1     1            1           2m7s
+deployment.apps/kind-prometheus-kube-prome-operator   1/1     1            1           2m7s
+deployment.apps/kind-prometheus-kube-state-metrics    1/1     1            1           2m7s
+
+NAME                                                             DESIRED   CURRENT   READY   AGE
+replicaset.apps/kind-prometheus-grafana-7cd8657994               1         1         1       2m7s
+replicaset.apps/kind-prometheus-kube-prome-operator-5977cd7b87   1         1         1       2m7s
+replicaset.apps/kind-prometheus-kube-state-metrics-f9f7f64bf     1         1         1       2m7s
+
+NAME                                                                    READY   AGE
+statefulset.apps/alertmanager-kind-prometheus-kube-prome-alertmanager   1/1     109s
+statefulset.apps/prometheus-kind-prometheus-kube-prome-prometheus       1/1     108s
+
+```
+you can access the web interfaces with this commands and then use(this is only the example):
+
+```bash
+kubectl port-forward -n monitoring svc/kind-prometheus-kube-prometheus-prometheus 9090:9090
+```
+
 
 Prometheus: http://<nodeIP>:30000/graph
 
