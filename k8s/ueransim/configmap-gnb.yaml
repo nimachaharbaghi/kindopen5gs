@@ -17,7 +17,7 @@ data:
     gtpIp: 0.0.0.0
 
     amfConfigs:
-      - address: amf
+      - address: amf.open5gs.svc.cluster.local
         port: 38412
 
     slices:
