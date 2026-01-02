@@ -438,6 +438,98 @@ kubectl create namespace open5gs
 - Internet access from UE
 - External traffic routing
 
+---
+
+## Deploying Prometheus on a kind Cluster Using Helm
+
+This section describes how to deploy **Prometheus**, **Grafana**, and **Alertmanager** on a local **kind (Kubernetes in Docker)** cluster using the **kube-prometheus-stack** Helm chart.
+
+---
+
+### Kube-Prometheus-Stack
+
+The **kube-prometheus-stack** is a collection of Kubernetes manifests, Grafana dashboards, and Prometheus rules managed by the **Prometheus Operator**. It provides an end-to-end monitoring solution for Kubernetes clusters.
+
+> **Note:** Helm must be installed before proceeding.
+
+---
+## Add Helm Repositories
+
+Add the Prometheus Community and Stable Helm repositories:
+
+```bash
+helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
+helm repo add stable https://charts.helm.sh/stable
+helm repo update
+```
+---
+###Create Monitoring Namespace
+
+Create a dedicated namespace for monitoring:
+```bash
+kubectl create namespace monitoring
+```
+---
+
+###Install kube-prometheus-stack
+
+Install the kube-prometheus-stack and expose services using NodePort:
+
+Prometheus: 30000
+
+Grafana: 31000
+
+Alertmanager: 32000
+```bash 
+helm install kind-prometheus prometheus-community/kube-prometheus-stack \
+  --namespace monitoring \
+  --set prometheus.service.type=NodePort \
+  --set prometheus.service.nodePort=30000 \
+  --set grafana.service.type=NodePort \
+  --set grafana.service.nodePort=31000 \
+  --set alertmanager.service.type=NodePort \
+  --set alertmanager.service.nodePort=32000 \
+  --set prometheus-node-exporter.service.type=NodePort \
+  --set prometheus-node-exporter.service.nodePort=32001
+```
+After deployment, you should see output similar to:
+
+```
+NAME: kind-prometheus
+NAMESPACE: monitoring
+STATUS: deployed
+REVISION: 1
+```
+
+---
+###Verify Installation
+
+Check that all pods are running:
+```bash
+kubectl get pods -n monitoring -l release=kind-prometheus
+```
+Verify all resources in the namespace:
+```bash 
+kubectl get all -n monitoring
+```
+---
+###Access Monitoring Dashboards
+
+Prometheus: http://<nodeIP>:30000/graph
+
+Alertmanager: http://<nodeIP>:32000/graph
+
+Grafana: http://<nodeIP>:31000
+
+Grafana Credentials
+
+Use the following credentials to access Grafana:
+```
+Username: admin
+
+Password: prom-operator
+```
+
 
 ---
 ## Status
