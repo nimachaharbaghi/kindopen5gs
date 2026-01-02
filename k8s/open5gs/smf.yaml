@@ -1,0 +1,60 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: smf
+  namespace: open5gs
+spec:
+  selector:
+    app: smf
+  ports:
+    - name: sbi
+      protocol: TCP
+      port: 7777
+      targetPort: 7777
+    - name: pfcp
+      protocol: UDP
+      port: 8805
+      targetPort: 8805
+    - name: gtpc
+      protocol: UDP
+      port: 2123
+      targetPort: 2123
+  type: ClusterIP
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: smf
+  namespace: open5gs
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: smf
+  template:
+    metadata:
+      labels:
+        app: smf
+    spec:
+      containers:
+      - name: smf
+        image: local/open5gs:latest
+        imagePullPolicy: Never
+        command: ["/bin/open5gs-smfd"]
+        args: ["-c", "/opt/open5gs/etc/open5gs/smf.yaml"]
+        ports:
+        - containerPort: 7777
+          name: sbi
+        - containerPort: 8805
+          name: pfcp
+          protocol: UDP
+        - containerPort: 2123
+          name: gtpc
+          protocol: UDP
+        volumeMounts:
+        - name: smf-config
+          mountPath: /opt/open5gs/etc/open5gs
+      volumes:
+      - name: smf-config
+        configMap:
+          name: smf-config

@@ -1,0 +1,63 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: upf
+  namespace: open5gs
+spec:
+  selector:
+    app: upf
+  ports:
+    - name: pfcp
+      protocol: UDP
+      port: 8805
+      targetPort: 8805
+    - name: gtpu
+      protocol: UDP
+      port: 2152
+      targetPort: 2152
+  type: ClusterIP
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: upf
+  namespace: open5gs
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: upf
+  template:
+    metadata:
+      labels:
+        app: upf
+    spec:
+      containers:
+      - name: upf
+        image: local/open5gs:latest
+        imagePullPolicy: Never
+        command: ["/usr/local/bin/upf-entrypoint.sh"]
+        securityContext:
+          privileged: true
+          capabilities:
+            add:
+              - NET_ADMIN
+        ports:
+        - containerPort: 8805
+          name: pfcp
+          protocol: UDP
+        - containerPort: 2152
+          name: gtpu
+          protocol: UDP
+        volumeMounts:
+        - name: upf-config
+          mountPath: /opt/open5gs/etc/open5gs
+        - name: dev-net-tun
+          mountPath: /dev/net/tun
+      volumes:
+      - name: upf-config
+        configMap:
+          name: upf-config
+      - name: dev-net-tun
+        hostPath:
+          path: /dev/net/tun

@@ -1,0 +1,26 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: upf-config
+  namespace: open5gs
+data:
+  upf.yaml: |
+    logger:
+      level: info
+
+    global:
+      max:
+        ue: 1024
+
+    upf:
+      pfcp:
+        server:
+          - address: 0.0.0.0
+            advertise: upf.open5gs.svc.cluster.local
+      gtpu:
+        server:
+          - address: 0.0.0.0
+            advertise: upf.open5gs.svc.cluster.local
+      session:
+        - subnet: 10.45.0.0/16
+          gateway: 10.45.0.1

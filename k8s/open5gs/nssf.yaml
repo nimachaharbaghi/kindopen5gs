@@ -1,0 +1,44 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: nssf
+  namespace: open5gs
+spec:
+  selector:
+    app: nssf
+  ports:
+    - protocol: TCP
+      port: 7777
+      targetPort: 7777
+  type: ClusterIP
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nssf
+  namespace: open5gs
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: nssf
+  template:
+    metadata:
+      labels:
+        app: nssf
+    spec:
+      containers:
+      - name: nssf
+        image: local/open5gs:latest
+        imagePullPolicy: Never
+        command: ["/bin/open5gs-nssfd"]
+        args: ["-c", "/opt/open5gs/etc/open5gs/nssf.yaml"]
+        ports:
+        - containerPort: 7777
+        volumeMounts:
+        - name: nssf-config
+          mountPath: /opt/open5gs/etc/open5gs
+      volumes:
+      - name: nssf-config
+        configMap:
+          name: nssf-config

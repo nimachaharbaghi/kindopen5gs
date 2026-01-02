@@ -1,0 +1,31 @@
+FROM ubuntu:22.04
+
+ENV DEBIAN_FRONTEND=noninteractive
+
+# Install dependencies
+RUN apt-get update && \
+    apt-get install -y \
+    make \
+    g++ \
+    cmake \
+    git \
+    libsctp-dev \
+    lksctp-tools \
+    iproute2 \
+    net-tools \
+    iputils-ping \
+    ca-certificates \
+    && rm -rf /var/lib/apt/lists/*
+
+WORKDIR /ueransim
+
+# Copy UERANSIM source
+COPY UERANSIM /ueransim
+
+# Build UERANSIM
+RUN make
+
+# Create config directory
+RUN mkdir -p /ueransim/config
+
+WORKDIR /ueransim

@@ -1,0 +1,18 @@
+kind: Cluster
+apiVersion: kind.x-k8s.io/v1alpha4
+name: kind-5gs
+nodes:
+- role: control-plane
+  extraPortMappings:
+  - containerPort: 30999
+    hostPort: 30999
+    protocol: TCP   # WebUI
+  - containerPort: 38412
+    hostPort: 38412
+    protocol: TCP   # N2 (AMF NGAP)
+  - containerPort: 2152
+    hostPort: 2152
+    protocol: UDP   # GTP-U
+  - containerPort: 8805
+    hostPort: 8805
+    protocol: UDP   # PFCP

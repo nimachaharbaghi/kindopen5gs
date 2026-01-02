@@ -1,0 +1,77 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: gnb
+  namespace: open5gs
+spec:
+  selector:
+    app: ueransim-gnb
+  ports:
+    - name: ngap
+      protocol: SCTP
+      port: 38412
+      targetPort: 38412
+    - name: gtpu
+      protocol: UDP
+      port: 2152
+      targetPort: 2152
+  type: ClusterIP
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ueransim-gnb
+  namespace: open5gs
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ueransim-gnb
+  template:
+    metadata:
+      labels:
+        app: ueransim-gnb
+    spec:
+      containers:
+      - name: gnb
+        image: local/ueransim:latest
+        imagePullPolicy: Never
+        command: ["/ueransim/build/nr-gnb"]
+        args: ["-c", "/ueransim/config/open5gs-gnb.yaml"]
+        securityContext:
+          privileged: true
+          capabilities:
+            add:
+              - NET_ADMIN
+        ports:
+        - containerPort: 38412
+          name: ngap
+          protocol: SCTP
+        - containerPort: 2152
+          name: gtpu
+          protocol: UDP
+        volumeMounts:
+        - name: gnb-config
+          mountPath: /ueransim/config
+        - name: ue-config
+          mountPath: /ueransim/ue-config
+      - name: ue
+        image: local/ueransim:latest
+        imagePullPolicy: Never
+        command: ["/bin/sh"]
+        args: ["-c", "sleep 15 && /ueransim/build/nr-ue -c /ueransim/ue-config/open5gs-ue.yaml"]
+        securityContext:
+          privileged: true
+          capabilities:
+            add:
+              - NET_ADMIN
+        volumeMounts:
+        - name: ue-config
+          mountPath: /ueransim/ue-config
+      volumes:
+      - name: gnb-config
+        configMap:
+          name: ueransim-gnb-config
+      - name: ue-config
+        configMap:
+          name: ueransim-ue-config

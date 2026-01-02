@@ -1,0 +1,44 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: udm
+  namespace: open5gs
+spec:
+  selector:
+    app: udm
+  ports:
+    - protocol: TCP
+      port: 7777
+      targetPort: 7777
+  type: ClusterIP
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: udm
+  namespace: open5gs
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: udm
+  template:
+    metadata:
+      labels:
+        app: udm
+    spec:
+      containers:
+      - name: udm
+        image: local/open5gs:latest
+        imagePullPolicy: Never
+        command: ["/bin/open5gs-udmd"]
+        args: ["-c", "/opt/open5gs/etc/open5gs/udm.yaml"]
+        ports:
+        - containerPort: 7777
+        volumeMounts:
+        - name: udm-config
+          mountPath: /opt/open5gs/etc/open5gs
+      volumes:
+      - name: udm-config
+        configMap:
+          name: udm-config

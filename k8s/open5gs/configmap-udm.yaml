@@ -1,0 +1,23 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: udm-config
+  namespace: open5gs
+data:
+  udm.yaml: |
+    logger:
+      level: info
+
+    global:
+      max:
+        ue: 1024
+
+    udm:
+      sbi:
+        server:
+          - address: 0.0.0.0
+            port: 7777
+            advertise: udm.open5gs.svc.cluster.local
+        client:
+          nrf:
+            - uri: http://nrf:7777

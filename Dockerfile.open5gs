@@ -1,0 +1,58 @@
+FROM ubuntu:22.04
+
+ENV DEBIAN_FRONTEND=noninteractive
+
+# Install dependencies
+RUN apt-get update && \
+    apt-get install -y \
+    python3-pip \
+    python3-setuptools \
+    python3-wheel \
+    ninja-build \
+    build-essential \
+    flex \
+    bison \
+    git \
+    cmake \
+    libsctp-dev \
+    libgnutls28-dev \
+    libgcrypt-dev \
+    libssl-dev \
+    libidn11-dev \
+    libmongoc-dev \
+    libbson-dev \
+    libyaml-dev \
+    libnghttp2-dev \
+    libmicrohttpd-dev \
+    libcurl4-gnutls-dev \
+    libnghttp2-dev \
+    libtins-dev \
+    libtalloc-dev \
+    meson \
+    iproute2 \
+    iptables \
+    ca-certificates \
+    netbase \
+    pkg-config \
+    && rm -rf /var/lib/apt/lists/*
+
+WORKDIR /open5gs
+
+# Copy Open5GS source
+COPY open5gs /open5gs
+
+# Build Open5GS
+RUN meson build --prefix=/ && \
+    ninja -C build && \
+    cd build && \
+    ninja install
+
+# Create necessary directories
+RUN mkdir -p /var/log/open5gs && \
+    mkdir -p /etc/open5gs
+
+# Copy UPF entrypoint script
+COPY upf-entrypoint.sh /usr/local/bin/upf-entrypoint.sh
+RUN chmod +x /usr/local/bin/upf-entrypoint.sh
+
+WORKDIR /
