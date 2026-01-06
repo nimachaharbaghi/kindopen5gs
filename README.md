@@ -761,3 +761,117 @@ We can visualise images with the command :
 <img width="1249" height="693" alt="image" src="https://github.com/user-attachments/assets/871a018b-739a-4e72-a423-054e6169a988" />
 
 
+
+BONUS  : 
+
+pip install nixtla
+
+Then go to : **https://dashboard.nixtla.io/**
+
+You need to sign in with a proffession / university email in order to obtain an API-KEY
+
+Then create **timegpt_amf.py** : 
+
+```bash
+import pandas as pd
+from nixtla import NixtlaClient
+import matplotlib.pyplot as plt
+import matplotlib.dates as mdates
+import os
+import warnings
+
+warnings.filterwarnings('ignore')
+
+# 1. Initialize Client with your key
+# Ensure the key is exactly as provided with no extra spaces
+api_key = ' **YOUR-API-KEY**'
+nixtla_client = NixtlaClient(api_key=api_key)
+
+# Verify API Key before running
+try:
+    if not nixtla_client.validate_api_key():
+        print("❌ API Key Rejected by Nixtla. Please check dashboard.nixtla.io")
+        exit()
+except Exception as e:
+    print(f"❌ Authentication failed: {e}")
+    exit()
+
+metrics = ['cpu', 'memory']
+
+for metric in metrics:
+    file_name = f'5gc_amf_{metric}.csv'
+    if not os.path.exists(file_name):
+        print(f"⚠️ {file_name} not found.")
+        continue
+        
+    # 2. Preprocess 1-Hour Context
+    df = pd.read_csv(file_name)
+    df['timestamp'] = pd.to_datetime(df['timestamp'], unit='s')
+    
+    # Resample to 5-min intervals so 12 steps = 1 hour prediction
+    df_clean = df.set_index('timestamp').resample('5min').mean().reset_index().ffill()
+    df_context = df_clean.tail(12) # Exactly 1 hour of history
+    
+    target = next((col for col in df_clean.columns if 'usage' in col), None)
+
+    # 3. Generate 1-Hour Forecast
+    print(f"🚀 TimeGPT forecasting AMF {metric.upper()}...")
+    try:
+        fcst_df = nixtla_client.forecast(
+            df=df_context, 
+            h=12, 
+            time_col='timestamp', 
+            target_col=target, 
+            freq='5min'
+        )
+        
+        # 4. Professional Visualization
+        plt.figure(figsize=(15, 6))
+        
+        # Plot Actual (Blue)
+        plt.plot(df_context['timestamp'], df_context[target], 
+                 label='Actual (Last 1h)', color='#1f77b4', marker='o', linewidth=2)
+        
+        # Plot Prediction (Orange)
+        plt.plot(fcst_df['timestamp'], fcst_df['TimeGPT'], 
+                 label='TimeGPT Forecast (Next 1h)', color='#ff7f0e', ls='--', marker='x', linewidth=2)
+        
+        # Separation line at "Now"
+        plt.axvline(x=df_context['timestamp'].iloc[-1], color='red', linestyle=':', label='Forecast Start')
+        
+        # Formatting
+        plt.title(f'AMF {metric.upper()} Utilization: 1h History vs 1h Prediction', fontsize=14)
+        plt.gca().xaxis.set_major_formatter(mdates.DateFormatter('%H:%M'))
+        plt.grid(True, alpha=0.3)
+        plt.legend()
+        
+        output_file = f'timegpt_amf_{metric}_bonus.png'
+        plt.savefig(output_file, dpi=200)
+        plt.close()
+        print(f"✅ Success! Saved to {output_file}")
+        
+    except Exception as e:
+        print(f"⚠️ Forecast failed for {metric}: {e}")
+
+print("\n🎯 TimeGPT AMF processing finished.")
+```
+
+Upon successful execution, the timegpt_amf.py script generates two visual reports: **timegpt_amf_cpu_bonus.png** and **timegpt_amf_memory_bonus.png** . These images show the last 1 hour of actual 5G telemetry followed by a matching 1-hour AI resource forecast."
+
+Finally , Chrono forecast vs TimeGPt comparaison  : 
+
+<img width="1849" height="373" alt="image" src="https://github.com/user-attachments/assets/62306ecb-e6f9-439d-b53b-52ed2e7ea3e1" />
+
+
+**Observation** :
+**Chronos-T5 (Local)**: The local model is very reactive to the most recent data points. Its forecast (red dashed line) tends to follow the immediate trend, which is excellent for detecting sudden, short-term spikes at the network edge.
+
+**TimeGPT (Cloud)** : The cloud-based model produces a much smoother and more generalized forecast (orange dashed line). It is better at "ignoring" minor noise and predicting a stable trend over the full hour.
+
+Infrastructure Trade-off: * Chronos is superior for privacy and latency, as it runs entirely on your local VM without needing an internet connection.
+
+TimeGPT offers a more refined "global" perspective, but requires sending sensitive 5G telemetry to an external cloud API.
+
+Conclustion : 
+"While both models accurately predicted that CPU usage would remain low after the initial spike, TimeGPT provided a more stable trend line, whereas the local Chronos-T5 proved to be a highly effective, low-latency alternative for real-time monitoring directly within the 5G cluster."
+
