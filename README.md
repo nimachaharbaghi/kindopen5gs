@@ -751,20 +751,21 @@ print("\nAll AMF analysis complete!")
 5. Final Visual Results
 After running the predictor with " $ python3 amf_predictor.py " , the system produces two high-resolution visualizations:
 
-**forecast_amf_cpu_1h.png**: Visualizes the predicted CPU demand surge.
+**chronos_amf_cpu_recent.png**: Visualizes the predicted CPU demand surge.
 
-**forecast_amf_memory_1h.png**: Visualizes the memory stability forecast.
+**chronos_amf_memory_recent.png**: Visualizes the memory stability forecast.
 
 We can visualise images with the command : 
 " $ xdg-open forecast_amf_memory_1h.png "
-
-<img width="1249" height="693" alt="image" src="https://github.com/user-attachments/assets/871a018b-739a-4e72-a423-054e6169a988" />
-
+<img width="1575" height="669" alt="image" src="https://github.com/user-attachments/assets/07d1a557-6f5e-4cd9-a33e-685835467e44" />
 
 
-BONUS  : 
 
+**BONUS : Using TimeGPT Model and comparing with local Chrono Model**  : 
+
+```bash
 pip install nixtla
+```bash
 
 Then go to : **https://dashboard.nixtla.io/**
 
