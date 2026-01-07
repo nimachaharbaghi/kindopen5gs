@@ -305,6 +305,12 @@ db.subscribers.insertOne({
 - **K (Key)**: 465B5CE8B199B49FAA5F0A2EE238A6BC
 - **OPc**: E8ED289DEBA952E4283B54E88E6183CA
 
+  
+⚠️ Troubleshooting 2 : Kubernetes might try to pull the image from Docker Hub. To stop it:
+```bash
+kubectl run debug -n open5gs --rm -it --restart=Never \
+  --image=local/open5gs:latest --image-pull-policy=Never --command -- /bin/sh
+```
 ### 6. Deploy UERANSIM
 
 Deploy ConfigMaps:
